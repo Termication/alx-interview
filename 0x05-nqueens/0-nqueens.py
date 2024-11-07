@@ -2,7 +2,8 @@
 """
 N-Queens Solution Finder
 This module solves the N-Queens puzzle by finding all valid arrangements
-where N queens can be placed on an NxN chessboard without threatening each other.
+where N queens can be placed on an NxN
+chessboard without threatening each other.
 """
 import sys
 
@@ -47,9 +48,11 @@ def queens_are_attacking(pos0, pos1):
         bool: True if the queens are in an attacking position; otherwise False.
     """
     # Queens attack if they share the same row, column, or diagonal.
-    return (pos0[0] == pos1[0] or  # Same row
-            pos0[1] == pos1[1] or  # Same column
-            abs(pos0[0] - pos1[0]) == abs(pos0[1] - pos1[1]))  # Same diagonal
+    return (
+        pos0[0] == pos1[0]
+        or pos0[1] == pos1[1]  # Same row
+        or abs(pos0[0] - pos1[0]) == abs(pos0[1] - pos1[1])  # Same column
+    )  # Same diagonal
 
 
 def solution_is_unique(candidate_solution):
@@ -57,13 +60,15 @@ def solution_is_unique(candidate_solution):
     Checks if a similar solution already exists in the solutions list.
 
     Args:
-        candidate_solution (list[list[int, int]]): A proposed solution of queen positions.
+        candidate_solution (list[list[int, int]]): A
+        proposed solution of queen positions.
 
     Returns:
         bool: True if the candidate solution exists; otherwise False.
     """
     for existing_solution in solutions:
-        if all(existing_solution[i] == candidate_solution[i] for i in range(n)):
+        if all(existing_solution[i] == candidate_solution[i]
+                for i in range(n)):
             return True
     return False
 
@@ -74,7 +79,8 @@ def try_to_build_solution(row, current_solution):
 
     Args:
         row (int): The current row being evaluated for queen placement.
-        current_solution (list[list[int, int]]): The list of queen positions so far.
+        current_solution (list[list[int, int]]):
+        The list of queen positions so far.
     """
     if row == n:
         # Full solution found; check for uniqueness and add to solutions.
@@ -83,7 +89,10 @@ def try_to_build_solution(row, current_solution):
     else:
         for col in range(n):
             pos = [row, col]
-            if all(not queens_are_attacking(pos, placed_pos) for placed_pos in current_solution):
+            if all(
+                not queens_are_attacking(pos, placed_pos)
+                for placed_pos in current_solution
+            ):
                 current_solution.append(pos)
                 try_to_build_solution(row + 1, current_solution)
                 current_solution.pop()
