@@ -1,46 +1,68 @@
 #!/usr/bin/node
 /**
- * Script to fetch and display the names of characters in a Star Wars film.
+ * Script to print all characters of a given Star Wars movie.
  *
  * Usage:
- * - The script accepts a single argument, which is the ID of a Star Wars film.
- * - It fetches the film details from the Star Wars API (SWAPI).
- * - It retrieves and prints the names of all characters appearing in the specified film.
+ * - The first positional argument is the Movie ID (e.g., 3 = "Return of the Jedi").
+ * - Fetches character names in the same order as listed in the "characters" array from the /films/ endpoint.
  */
 
 const request = require('request');
 const API_URL = 'https://swapi-api.hbtn.io/api';
 
-// Check if a film ID argument is provided
+// Check if a Movie ID is provided
 if (process.argv.length > 2) {
-  // Make a request to the Star Wars API to get film details using the provided ID
-  request(`${API_URL}/films/${process.argv[2]}/`, (err, _, body) => {
+  const movieId = process.argv[2];
+  const url = `${API_URL}/films/${movieId}/`;
+
+  // Fetch the film details using the Movie ID
+  request(url, (err, res, body) => {
     if (err) {
       console.error(err);
       return;
     }
 
-    // Extract the URLs of the characters appearing in the film
-    const charactersURL = JSON.parse(body).characters;
+    // Check for valid response status
+    if (res.statusCode !== 200) {
+      console.error(`Failed to fetch film. Status code: ${res.statusCode}`);
+      return;
+    }
 
-    // Map each character URL to a promise that fetches the character's name
-    const charactersName = charactersURL.map((url) => {
+    let charactersURL;
+    try {
+      charactersURL = JSON.parse(body).characters;
+    } catch (parseErr) {
+      console.error('Failed to parse JSON response:', parseErr);
+      return;
+    }
+
+    // Function to fetch character names and display them in order
+    const fetchCharacterName = (url) => {
       return new Promise((resolve, reject) => {
-        request(url, (promiseErr, __, charactersReqBody) => {
-          if (promiseErr) {
-            reject(promiseErr);
-            return;
+        request(url, (charErr, charRes, charBody) => {
+          if (charErr) {
+            reject(charErr);
+          } else if (charRes.statusCode !== 200) {
+            reject(new Error(`Failed to fetch character. Status code: ${charRes.statusCode}`));
+          } else {
+            try {
+              const name = JSON.parse(charBody).name;
+              resolve(name);
+            } catch (nameParseErr) {
+              reject(nameParseErr);
+            }
           }
-          // Resolve the promise with the character's name
-          resolve(JSON.parse(charactersReqBody).name);
         });
       });
-    });
+    };
 
-    // Once all character names are fetched, print them line by line
-    Promise.all(charactersName)
+    // Create a list of promises to fetch all character names
+    const charactersPromises = charactersURL.map(fetchCharacterName);
+
+    // Resolve all promises and print the character names in order
+    Promise.all(charactersPromises)
       .then((names) => {
-        console.log(names.join('\n'));
+        names.forEach((name) => console.log(name));
       })
       .catch((allErr) => {
         console.error(allErr);
