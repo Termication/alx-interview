@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-'''Minimum Operations Python 3 Challenge'''
+'''Minimum Operations Python 3 Challenge interview'''
 
 
 def minOperations(n):
@@ -43,7 +43,7 @@ def minOperations(n):
         if remaining_chars % current_chars != 0:
             # Paste current clipboard contents
             current_chars += copied_chars
-            # Increment operation count
+            # Increment operation  count
             operation_count += 1
         else:
             # Copy all current characters to clipboard
